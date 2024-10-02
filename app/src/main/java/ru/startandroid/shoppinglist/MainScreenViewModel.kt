@@ -8,10 +8,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(
-    val navigator: Navigator
+    val navigator: Navigator,
+    val navScreens: MutableSet<NavScreen>
 ) : ViewModel() {
 
-    // TODO inject it
-    val navScreens: MutableSet<NavScreen> = mutableSetOf(HomeNavScreen())
 
 }

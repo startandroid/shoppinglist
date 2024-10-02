@@ -37,21 +37,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-// TODO delete
-class HomeNavScreen: NavScreen {
-
-    @Serializable
-    data object HomeRoute
-
-    override fun addToGraph(navContext: NavContext) {
-        navContext.navGraphBuilder.composable<HomeRoute> {
-            HomeScreen()
-        }
-    }
-}
-
-@Composable
-fun HomeScreen() {
-    Text(text = "Home")
-}

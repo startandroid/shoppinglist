@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import ru.startandroid.core.navigation.NavContext
 import ru.startandroid.core.navigation.NavigateTo
+import ru.startandroid.feature.catalog.view.folder.navigation.FoldersNavScreen
 
 @Composable
 fun MainScreen(
@@ -22,7 +23,7 @@ fun MainScreen(
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             NavHost(
                 navController = navController,
-                startDestination = HomeNavScreen.HomeRoute
+                startDestination = FoldersNavScreen.FoldersRoute
             ) {
                 val navContext = NavContext(navController, this)
                 viewModel.navScreens.forEach { navScreen ->
