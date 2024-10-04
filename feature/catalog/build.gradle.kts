@@ -10,4 +10,5 @@ android {
 
 dependencies {
     implementation(project(":feature:catalog:view"))
+    implementation(project(":feature:catalog:data"))
 }

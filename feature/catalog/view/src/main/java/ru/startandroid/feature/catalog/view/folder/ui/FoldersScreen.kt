@@ -46,7 +46,8 @@ import ru.startandroid.core.ui.components.fab.CstSmallFab
 import ru.startandroid.core.ui.components.screen.CstScreen
 import ru.startandroid.core.ui.components.topbar.CstTopBar
 import ru.startandroid.core.ui.components.topbar.CstTopBarIcon
-import ru.startandroid.feature.catalog.view.folder.model.Folder
+import ru.startandroid.core.ui.extensions.collectValue
+import ru.startandroid.feature.catalog.domain.model.FolderDm
 
 @Composable
 fun FoldersScreen(
@@ -73,8 +74,8 @@ fun FoldersScreen(
         showFabOverlay = fabExpanded,
         onDismissFabOverlay = { fabExpanded = false }
     ) {
-        val folders = viewModel.folders.collectAsState().value
-        val selectedFoldersIds = viewModel.selectedFoldersIds.collectAsState().value
+        val folders = viewModel.folders.collectValue()
+        val selectedFoldersIds = viewModel.selectedFoldersIds.collectValue()
         LazyColumn {
             items(items = folders, key = { it.id }) { folder ->
                 FolderItem(
@@ -176,10 +177,10 @@ private fun Fab(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FolderItem(
-    folder: Folder,
-    onClick: (Int) -> Unit,
-    onLongClick: (Int) -> Unit,
-    onIconClick: (Int) -> Unit,
+    folder: FolderDm,
+    onClick: (Long) -> Unit,
+    onLongClick: (Long) -> Unit,
+    onIconClick: (Long) -> Unit,
     selected: Boolean
 ) {
     Box(modifier = Modifier.padding(vertical = 2.dp)) {

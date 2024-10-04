@@ -1,47 +1,45 @@
 package ru.startandroid.feature.catalog.view.folder.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import ru.startandroid.core.ui.components.dialog.CstConfirmationDialogStateHolder
 import ru.startandroid.core.ui.components.dialog.CstTextInputDialogStateHolder
-import ru.startandroid.feature.catalog.view.folder.model.Folder
+import ru.startandroid.core.ui.extensions.stateInVm
+import ru.startandroid.feature.catalog.domain.model.FolderDm
+import ru.startandroid.feature.catalog.domain.repository.FolderRepository
 import javax.inject.Inject
-
-
-
 
 
 @HiltViewModel
 class FoldersViewModel @Inject constructor(
+    private val folderRepository: FolderRepository,
     val createFolderDialogStateHolder: CstTextInputDialogStateHolder,
     val editFolderDialogStateHolder: CstTextInputDialogStateHolder,
     val deleteFolderDialogStateHolder: CstConfirmationDialogStateHolder
 ) : ViewModel() {
 
-    private var idCounter = 5
-    val folders = MutableStateFlow<List<Folder>>(
-        List(idCounter) { Folder(id = it, name = "Folder $it") }
-    )
+    val folders = folderRepository.getFolders().stateInVm()
 
-    private val _selectedFoldersIds = MutableStateFlow<Set<Int>>(emptySet())
+    private val _selectedFoldersIds = MutableStateFlow<Set<Long>>(emptySet())
     val selectedFoldersIds = _selectedFoldersIds.asStateFlow()
 
     val singleSelected = selectedFoldersIds.map { it.size == 1 }
     val multipleSelected = selectedFoldersIds.map { it.isNotEmpty() }
 
-    fun onFolderClick(id: Int) {
+    fun onFolderClick(id: Long) {
 
     }
 
-    fun onFolderLongClick(id: Int) {
+    fun onFolderLongClick(id: Long) {
         changeFolderSelection(id)
     }
 
-    fun onFolderIconClick(id: Int) {
+    fun onFolderIconClick(id: Long) {
         changeFolderSelection(id)
     }
 
@@ -52,8 +50,9 @@ class FoldersViewModel @Inject constructor(
 
 
     fun onCreateFolderDialogConfirmed(name: String) {
-        val newFolder = Folder(id = idCounter++, name = name)
-        folders.value += newFolder
+        viewModelScope.launch {
+            folderRepository.addFolder(FolderDm(name = name))
+        }
     }
 
 
@@ -64,14 +63,8 @@ class FoldersViewModel @Inject constructor(
 
     fun onEditFolderDialogConfirmed(name: String) {
         val selectedFolderId = selectedFoldersIds.value.firstOrNull() ?: return
-        folders.update {
-            it.map { folder ->
-                if (folder.id == selectedFolderId) {
-                    folder.copy(name = name)
-                } else {
-                    folder
-                }
-            }
+        viewModelScope.launch {
+            folderRepository.renameFolder(selectedFolderId, name)
         }
         clearSelection()
     }
@@ -81,7 +74,11 @@ class FoldersViewModel @Inject constructor(
     }
 
     fun onDeleteFolderDialogConfirmed() {
-        folders.value = folders.value.filter { it.id !in selectedFoldersIds.value }
+        viewModelScope.launch {
+            selectedFoldersIds.value.forEach { id ->
+                folderRepository.deleteFolder(id)
+            }
+        }
         clearSelection()
     }
 
@@ -94,11 +91,11 @@ class FoldersViewModel @Inject constructor(
         _selectedFoldersIds.value = emptySet()
     }
 
-    private fun getSelectedFolders(): List<Folder> {
+    private fun getSelectedFolders(): List<FolderDm> {
         return folders.value.filter { it.id in selectedFoldersIds.value }
     }
 
-    private fun changeFolderSelection(id: Int) {
+    private fun changeFolderSelection(id: Long) {
         if (_selectedFoldersIds.value.contains(id)) {
             _selectedFoldersIds.value -= id
         } else {
